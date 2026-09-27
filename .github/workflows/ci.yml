@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  workflow_dispatch:
+
+jobs:
+  ci:
+    name: ci [${{ matrix.expander_leg }}]
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - version: '11'
+          dist: 'microsoft'
+          os: macos-latest
+          arch: arm64
+          runner: macos-latest
+          expander_leg: macos-latest--arm64
+    runs-on: ${{ matrix.runner }}
+    steps:
+    - name: checkout code
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    - name: set up JDK ${{matrix.version}} (${{matrix.dist}})
+      uses: actions/setup-java@v3
+      with:
+        java-version: ${{ matrix.version }}
+        distribution: ${{ matrix.dist }}
+    - name: test
+      run: ./gradlew --info test --no-daemon
+    timeout-minutes: 150
